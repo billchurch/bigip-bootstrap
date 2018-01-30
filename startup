@@ -1,0 +1,56 @@
+#
+# NOTE:
+# This file will be installed in /config/startup and it will
+# be called by /etc/rc.local.
+#
+# - /config/startup is for customer config additions and
+#   will be saved in UCS and synced by tmsh run sys sync-sys-files
+#
+# - /etc/rc.local should *not* be used by customers and
+#   can/will be changed by F5
+#
+export myFileName=/config/startup_script_mcpd_commands.sh
+
+NOFORWARDING=`grep 'AllowTcpForwarding no' /config/ssh/sshd_config | wc -l`
+
+if [ "$NOFORWARDING" -eq 1 ]; then
+  # Enable TCP Port Forwarding for SSH, mostly for using rsub below I let this check every boot
+  # because it's possible to get changed The "tmsh sys sshd includes" option doesn't seem to help
+  # here so I use this instead
+  logger -p local0.notice -t $myFileName Modifying /config/ssh/sshd_config to allow port forwarding
+  sed -i.bak 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /config/ssh/sshd_config
+
+fi
+
+if [ ! -f /usr/local/bin/rsub ]; then
+  # install rsub for remote file editing using Sublime Text... Might be risky but whatever...
+  # this may not go on the first boot, but should on the next reboot, checks every time
+  mount -o remount,rw /usr
+  curl -Lo /usr/local/bin/rsub https://raw.github.com/aurora/rmate/master/rmate 2>&1 | logger -p local0.notice -t mytest
+  chmod 755 /usr/local/bin/rsub
+  mount -o remount /usr
+fi
+
+if [ ! -f /root/.sshKeysAdded ]; then
+
+  logger -p local0.notice /config/startup: Adding ssh keys to /root/.ssh/authorized_keys
+  echo YOUR SSH KEYS >> /root/.ssh/authorized_keys
+  touch /root/.sshKeysAdded
+fi
+
+GITINSTALLED=`git version | wc -l`
+
+if [ "$GITINSTALLED" -eq 0 ]; then
+  # install git client
+  logger -p local0.notice -t $myFileName downloading git client and supporting RPMs
+  curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm > /tmp/git-1.7.1-9.el6_9.i686.rpm && logger -p local0.notice -t $myFileName SUCCESS curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm || logger -p local0.notice -t $myFileName FAILED curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm
+  curl https://rpmfind.net/linux/centos/6.9/os/x86_64/Packages/perl-Error-0.17015-4.el6.noarch.rpm > /tmp/perl-Error-0.17015-4.el6.noarch.rpm && logger -p local0.notice -t $myFileName SUCCESS curl https://rpmfind.net/linux/centos/6.9/os/x86_64/Packages/perl-Error-0.17015-4.el6.noarch.rpm || logger -p local0.notice -t $myFileName FAILED curl https://rpmfind.net/linux/centos/6.9/os/x86_64/Packages/perl-Error-0.17015-4.el6.noarch.rpm
+  curl https://rpmfind.net/linux/centos/6.9/updates/x86_64/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm > /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm && logger -p local0.notice -t $myFileName SUCCESS curl https://rpmfind.net/linux/centos/6.9/updates/x86_64/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm || logger -p local0.notice -t $myFileName FAILED curl https://rpmfind.net/linux/centos/6.9/updates/x86_64/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm
+  mount -o remount,rw /usr
+  rpm -i /tmp/perl-Error-0.17015-4.el6.noarch.rpm /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm /tmp/git-1.7.1-9.el6_9.i686.rpm && logger -p local0.notice -t $myFileName SUCCESS || logger -p local0.notice -t $myFileName FAILED rpm -i /tmp/perl-Error-0.17015-4.el6.noarch.rpm /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm /tmp/git-1.7.1-9.el6_9.i686.rpm
+  rm /tmp/perl-Error-0.17015-4.el6.noarch.rpm /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm /tmp/git-1.7.1-9.el6_9.i686.rpm && logger -p local0.notice -t $myFileName SUCCESS git installed || logger -p local0.notice -t $myFileName FAILED git install failed
+  mount -o remount,ro /usr
+fi
+
+/config/startup_script_mcpd_commands.sh &
+
