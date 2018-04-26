@@ -22,6 +22,14 @@ if [ "$NOFORWARDING" -eq 1 ]; then
 
 fi
 
+ACCEPTENV=`grep 'AcceptEnv RMATE_PORT' /config/ssh/sshd_config | wc -l`
+
+if [ "$ACCEPTENV" -ne 1 ]; then
+  # Enable RMATE_PORT for mutli-user RSUB
+  logger -p local0.notice -t $myFileName Modifying /config/ssh/sshd_config to allow AcceptENV RMATE_PORT
+  echo AcceptEnv RMATE_PORT >> /config/ssh/sshd_config
+fi
+
 if [ ! -f /usr/local/bin/rsub ]; then
   # install rsub for remote file editing using Sublime Text... Might be risky but whatever...
   # this may not go on the first boot, but should on the next reboot, checks every time
