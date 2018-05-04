@@ -4,7 +4,8 @@ echo 'nameserver 192.168.30.1' > /etc/resolv.conf
 mkdir /mnt/config
 mount /dev/vg-db-hda/set.1._config /mnt/config
 cd /mnt/config
-scp bill@192.168.0.71:/Users/bill/BIG-IP/startup* .
+curl -k https://raw.githubusercontent.com/billchurch/bigip-bootstrap/master/startup > startup
+curl -k https://raw.githubusercontent.com/billchurch/bigip-bootstrap/master/startup_script_mcpd_commands.sh > startup_script_mcpd_commands.sh
 chmod 755 startup*
 cd /
 umount /mnt/config
