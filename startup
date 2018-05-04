@@ -40,10 +40,15 @@ if [ ! -f /usr/local/bin/rsub ]; then
 fi
 
 if [ ! -f /root/.sshKeysAdded ]; then
-
-  logger -p local0.notice /config/startup: Adding ssh keys to /root/.ssh/authorized_keys
-  echo YOUR SSH KEYS >> /root/.ssh/authorized_keys
-  touch /root/.sshKeysAdded
+  # Add just the key portion of your SSH public key into the BIOS section under "SKU" to insert RSA key. Should be a
+  # single line of text with no spaces, no "ssh-rsa" before and no indentifier after. Example
+  # This key: "ssh-rsa AAHBBSBDUDSDSNKSD... bill@somwhere.com" should look like this "AAHBBSBDUDSDSNKSD..."
+  mySSHPUBKEY=$(dmidecode -t system | grep -i 'SKU Number:' | awk {'print $3'})  
+  if [ ! -z $mySSHPUBKEY ]; then
+    logger -p local0.notice /config/startup: Adding ssh keys to /root/.ssh/authorized_keys
+    echo "ssh-rsa $mySSHPUBKEY from_config_startup" >> /root/.ssh/authorized_keys
+    touch /root/.sshKeysAdded
+  fi
 fi
 
 GITINSTALLED=`git version | wc -l`
