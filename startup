@@ -50,13 +50,31 @@ GITINSTALLED=`git version | wc -l`
 
 if [ "$GITINSTALLED" -eq 0 ]; then
   # install git client
+  GIT_LOCATION=http://mirror.centos.org/centos/6/os/x86_64/Packages/git-1.7.1-9.el6_9.x86_64.rpm
+  GIT_FILE=/tmp/git-1.7.1-9.el6_9.x86_64.rpm
+  PERL_ERROR_LOCATION=http://mirror.centos.org/centos/6/os/i386/Packages/perl-Error-0.17015-4.el6.noarch.rpm
+  PERL_ERROR_FILE=/tmp/perl-Error-0.17015-4.el6.noarch.rpm
+  PERL_GIT_LOCATION=http://mirror.centos.org/centos/6/os/i386/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm
+  PERL_GIT_FILE=/tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm
+
   logger -p local0.notice -t $myFileName downloading git client and supporting RPMs
-  curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm > /tmp/git-1.7.1-9.el6_9.i686.rpm && logger -p local0.notice -t $myFileName SUCCESS curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm || logger -p local0.notice -t $myFileName FAILED curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm curl https://rpmfind.net/linux/centos/6.9/updates/i386/Packages/git-1.7.1-9.el6_9.i686.rpm
-  curl https://rpmfind.net/linux/centos/6.9/os/x86_64/Packages/perl-Error-0.17015-4.el6.noarch.rpm > /tmp/perl-Error-0.17015-4.el6.noarch.rpm && logger -p local0.notice -t $myFileName SUCCESS curl https://rpmfind.net/linux/centos/6.9/os/x86_64/Packages/perl-Error-0.17015-4.el6.noarch.rpm || logger -p local0.notice -t $myFileName FAILED curl https://rpmfind.net/linux/centos/6.9/os/x86_64/Packages/perl-Error-0.17015-4.el6.noarch.rpm
-  curl https://rpmfind.net/linux/centos/6.9/updates/x86_64/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm > /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm && logger -p local0.notice -t $myFileName SUCCESS curl https://rpmfind.net/linux/centos/6.9/updates/x86_64/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm || logger -p local0.notice -t $myFileName FAILED curl https://rpmfind.net/linux/centos/6.9/updates/x86_64/Packages/perl-Git-1.7.1-9.el6_9.noarch.rpm
+  curl $GIT_LOCATION > $GIT_FILE && logger -p local0.notice -t $myFileName SUCCESS curl $GIT_LOCATION || logger -p local0.notice -t $myFileName FAILED curl $GIT_LOCATION 
+
+  curl $PERL_ERROR_LOCATION > $PERL_ERROR_FILE && logger -p local0.notice -t $myFileName SUCCESS curl $PERL_ERROR_LOCATION || logger -p local0.notice -t $myFileName FAILED curl $PERL_ERROR_LOCATION
+  
+  curl $PERL_GIT_LOCATION > $PERL_GIT_FILE && logger -p local0.notice -t $myFileName SUCCESS curl $PERL_GIT_LOCATION || logger -p local0.notice -t $myFileName FAILED curl $GIPERL_GIT_LOCATIONT_LOCATION
+  
   mount -o remount,rw /usr
-  rpm -i /tmp/perl-Error-0.17015-4.el6.noarch.rpm /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm /tmp/git-1.7.1-9.el6_9.i686.rpm && logger -p local0.notice -t $myFileName SUCCESS || logger -p local0.notice -t $myFileName FAILED rpm -i /tmp/perl-Error-0.17015-4.el6.noarch.rpm /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm /tmp/git-1.7.1-9.el6_9.i686.rpm
-  rm /tmp/perl-Error-0.17015-4.el6.noarch.rpm /tmp/perl-Git-1.7.1-9.el6_9.noarch.rpm /tmp/git-1.7.1-9.el6_9.i686.rpm && logger -p local0.notice -t $myFileName SUCCESS git installed || logger -p local0.notice -t $myFileName FAILED git install failed
+  
+  rpm -i \
+    $PERL_ERROR_FILE \
+    $PERL_GIT_FILE \
+    $GIT_FILE && logger -p local0.notice -t $myFileName SUCCESS || logger -p local0.notice -t $myFileName FAILED rpm -i $PERL_ERROR_FILE $PERL_GIT_FILE $GIT_FILE
+
+  rm $PERL_ERROR_FILE \
+     $PERL_GIT_FILE \
+     $GIT_FILE && logger -p local0.notice -t $myFileName SUCCESS git installed || logger -p local0.notice -t $myFileName FAILED git install failed
+
   mount -o remount,ro /usr
 fi
 
