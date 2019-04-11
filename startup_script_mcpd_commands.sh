@@ -2,9 +2,9 @@
 # Filename: /config/startup_script_mcpd_commands.sh
 export myFileName=/config/startup_script_mcpd_commands.sh
 
-export mysshkey=<key here>
-
 export REMOTEUSER=root
+
+source ./.env.sh
 
 # Limit to 5 times in while-loop, ie. 4 x 30 secs sleep = 2 mins.
 MAX_LOOP=5

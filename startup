@@ -11,6 +11,8 @@
 #
 export myFileName=/config/startup_script_mcpd_commands.sh
 
+source ./.env.sh
+
 NOFORWARDING=`grep 'AllowTcpForwarding no' /config/ssh/sshd_config | wc -l`
 
 if [ "$NOFORWARDING" -eq 1 ]; then
