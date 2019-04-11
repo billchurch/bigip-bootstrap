@@ -2,6 +2,8 @@
 # Filename: /config/startup_script_mcpd_commands.sh
 export myFileName=/config/startup_script_mcpd_commands.sh
 
+export mysshkey=<key here>
+
 export REMOTEUSER=root
 
 # Limit to 5 times in while-loop, ie. 4 x 30 secs sleep = 2 mins.
@@ -21,6 +23,8 @@ if [ "$MCPD_RUNNING" -eq 1 ]; then
 
     logger -p local0.notice -t $myFileName customization script setup disabled, timezone, auth timeout, records 30, dns resolver, ocsp
 
+    tmsh modify auth password-policy policy-enforcement disabled
+
     tmsh modify sys global-settings gui-setup disabled
 
     tmsh modify sys ntp timezone America/New_York
@@ -29,9 +33,9 @@ if [ "$MCPD_RUNNING" -eq 1 ]; then
 
     tmsh modify sys db ui.system.preferences.recordsperscreen value 30
 
-    tmsh create net dns-resolver ocsp-resolver cache-size 5767168
+    # tmsh create net dns-resolver ocsp-resolver cache-size 5767168
 
-    tmsh create sys crypto cert-validator ocsp ocsp_sslo route-domain 0 dns-resolver ocsp-resolver signer-cert default.crt signer-key default.key sign-hash sha1
+    # tmsh create sys crypto cert-validator ocsp ocsp_sslo route-domain 0 dns-resolver ocsp-resolver signer-cert default.crt signer-key default.key sign-hash sha1
 
     tmsh modify sys db dhclient.mgmt value enable
 
@@ -45,6 +49,13 @@ if [ "$MCPD_RUNNING" -eq 1 ]; then
 
     if [ ! -z $myHOSTNAME ]; then
       tmsh modify sys global-settings hostname $myHOSTNAME
+    fi
+
+    if [ ! -f /root/.sshKeysAdded ]; then
+
+      logger -p local0.notice /config/startup: Adding ssh keys to /root/.ssh/authorized_keys
+      echo $mysshkey >> /root/.ssh/authorized_keys
+      touch /root/.sshKeysAdded
     fi
 
     sleep 10
